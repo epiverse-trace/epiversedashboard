@@ -27,6 +27,13 @@ Imports:
     gh,
     cranlogs,
     magick
+Config/Needs/website:
+  hadley/emo,
+  flexdashboard,
+  forcats,
+  jsonlite,
+  rmarkdown,
+  ggplot2
 Remotes:
   jeroen/curl,
   rstudio/rmarkdown
