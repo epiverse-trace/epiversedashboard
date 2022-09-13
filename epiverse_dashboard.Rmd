@@ -4,11 +4,11 @@ output:
     orientation: rows
     vertical_layout: fill
     theme: paper
-    source_code: "https://github.com/jimhester/tidyversedashboard"
+    source_code: "https://github.com/epiverse-trace/epiversedashboard"
 params:
   title:
     label: Title of report
-    value: Tidyverse dashboard
+    value: Epiverse-TRACE dashboard
     input: text
   start: 
     label: Start date of report
@@ -16,7 +16,7 @@ params:
     input: date
   orgs:
     label: GitHub organizations
-    value: tidyverse, r-lib, r-dbi, tidymodels
+    value: epiverse-trace
     input: text
   privacy:
     label: Repository Privacy
@@ -36,7 +36,7 @@ library(purrr)
 library(tibble)
 library(codetools) # there was a weird error on connect that needed this
 library(DT)
-library(tidyversedashboard)
+library(epiversedashboard)
 library(tidyr)
 library(sparkline)
 library(ggplot2)
