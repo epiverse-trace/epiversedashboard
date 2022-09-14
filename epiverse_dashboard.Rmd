@@ -104,7 +104,7 @@ issue_data2 <- issue_data %>%
         merged >= start ~ "merged",
         closed >= start ~ "closed",
         opened >= start ~ "opened",
-        TRUE ~ NA_character_)),
+        TRUE ~ "old")),
     event = case_when(
       status == "merged" ~ merged,
       status == "closed" ~ closed,
@@ -113,37 +113,71 @@ issue_data2 <- issue_data %>%
 ```
 
 ```{r}
-totals <- issue_data2 %>% group_by(type, status) %>% tally() %>% mutate(n = if_else(status == "closed" | status == "merged", n * -1L, n)) %>% na.omit()
+totals <- issue_data2 %>%
+  filter(status != "old") %>%
+  group_by(type, status) %>%
+  tally() %>%
+  mutate(n = if_else(status == "closed" | status == "merged", n * -1L, n)) %>%
+  na.omit()
 ```
 
 Row
 ------------------------------
 
-### Issues / pull requests opened
-```{r}
-valueBox(totals %>% filter(status == "opened") %>% pull("n") %>% sum(), icon = "fa-exclamation-circle", color = "success")
+```{r, include = FALSE}
+pr_opened_sum <- totals %>% filter(type == "pull_request", status == "opened") %>% pull("n") %>% sum()
+pr_closed_sum <- totals %>% filter(type == "pull_request", (status == "merged" | status == "closed")) %>% pull("n") %>% abs() %>% sum()
+pr_change <- totals %>% filter(type == "pull_request") %>% pull("n") %>% sum()
+pr_open <- if(is.null(pr_data)) 0 else nrow(pr_data)
+
+issue_opened_sum <- totals %>% filter(type == "issue", status == "opened") %>% pull("n") %>% sum()
+issue_closed_sum <- totals %>% filter(type == "issue", status == "closed") %>% pull("n") %>% abs()
+issue_change <- totals %>% filter(type == "issue") %>% pull("n") %>% sum()
+issue_open <- nrow(issues)
 ```
 
-### Issues closed
+
+### Pull requests opened
 ```{r}
-valueBox(totals %>% filter(type == "issue", status == "closed") %>% pull("n") %>% abs(), icon = "fa-times-circle", color = "danger")
+valueBox(pr_opened_sum, icon = "fa-exclamation-circle", color = "#cfe2f3")
 ```
 
 ### Pull requests merged / closed
 ```{r}
-valueBox(totals %>% filter(type == "pull_request" & (status == "merged" | status == "closed")) %>% pull("n") %>% sum() %>% abs(), icon = "ion-merge", color = "info")
+valueBox(pr_closed_sum, icon = "ion-merge", color = "#ead1e8")
 ```
 
-### `r duration` change
+### Pull requests `r duration` change
 ```{r}
-change <- sum(totals$n)
-valueBox(change, icon = "fa-exclamation-circle", color = if (change > 0) "success" else "danger")
+valueBox(pr_change, icon = "fa-exclamation-circle", color = if (pr_change <= 0) "#D1E2CC" else "danger")
 ```
 
-### Remaining open issues
+### Remaining pull requests
 ```{r}
-valueBox(nrow(issues), icon = "fa-exclamation-circle")
+valueBox(pr_open, icon = "fa-clipboard-list", color = "#DDD")
 ```
+
+### Issues opened
+```{r}
+valueBox(issue_opened_sum, icon = "fa-exclamation-circle", color = "#cfe2f3")
+```
+
+### Issues closed
+```{r}
+valueBox(issue_closed_sum, icon = "fa-times-circle", color = "#ead1e8")
+```
+
+
+### Issues `r duration` change
+```{r}
+valueBox(issue_change, icon = if (issue_change <= 0) "fa-arrow-down" else "fa-arrow-up", color = if (issue_change <= 0) "#D1E2CC" else "danger")
+```
+
+### Remaining issues
+```{r}
+valueBox(issue_open, icon = "fa-clipboard-list", color = "#DDD")
+```
+
 
 Row
 -------------------------------------
@@ -157,7 +191,7 @@ issue_progress_table <- issue_data2 %>%
               select(repo, maintainer), by = c("package" = "repo")) %>%
   group_by(type, status) %>%
   arrange(event) %>%
-  select(owner, package, issue, maintainer, event, status, type) %>%
+  select(owner, package, type, number = issue, status, maintainer, event) %>%
   na.omit()
 
 data_table(issue_progress_table)
@@ -242,6 +276,23 @@ issue_table <- mutate(issues,
   rename(!!p1 := p1)
 
 data_table(issue_table)
+```
+
+Unlabeled issues
+====================================
+
+```{r}
+issue_table %>%
+  filter(labels == "") %>%
+  select(-labels) %>%
+  data_table(
+    list(
+      order = list(
+        list(4, "asc")  # updated from oldest to newest
+      )
+    )
+  )
+
 ```
 
 `r duration` pull request summary
