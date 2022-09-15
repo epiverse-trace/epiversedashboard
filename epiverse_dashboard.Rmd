@@ -128,12 +128,12 @@ Row
 pr_opened_sum <- totals %>% filter(type == "pull_request", status == "opened") %>% pull("n") %>% sum()
 pr_closed_sum <- totals %>% filter(type == "pull_request", (status == "merged" | status == "closed")) %>% pull("n") %>% abs() %>% sum()
 pr_change <- totals %>% filter(type == "pull_request") %>% pull("n") %>% sum()
-pr_open <- if(is.null(pr_data)) 0 else nrow(pr_data)
+pr_open <- sum(repo_summary$prs)
 
 issue_opened_sum <- totals %>% filter(type == "issue", status == "opened") %>% pull("n") %>% sum()
 issue_closed_sum <- totals %>% filter(type == "issue", status == "closed") %>% pull("n") %>% abs()
 issue_change <- totals %>% filter(type == "issue") %>% pull("n") %>% sum()
-issue_open <- nrow(issues)
+issue_open <- sum(repo_summary$open_issues)
 ```
 
 
