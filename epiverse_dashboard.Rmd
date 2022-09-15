@@ -278,23 +278,6 @@ issue_table <- mutate(issues,
 data_table(issue_table)
 ```
 
-Unlabeled issues
-====================================
-
-```{r}
-issue_table %>%
-  filter(labels == "") %>%
-  select(-labels) %>%
-  data_table(
-    list(
-      order = list(
-        list(4, "asc")  # updated from oldest to newest
-      )
-    )
-  )
-
-```
-
 `r duration` pull request summary
 =====================================
 
