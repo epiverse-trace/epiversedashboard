@@ -13,10 +13,6 @@ params:
     label: Start date of report
     value: !r lubridate::today() - lubridate::ddays(30)
     input: date
-  repos:
-    - epiverse-trace/linelist
-    - epiforecasts/socialmixr
-    - epiverse-trace/finalsize
 title: "`r params$title`"	
 ---
 
@@ -48,8 +44,12 @@ on_macos <- function() tolower(Sys.info()[["sysname"]]) == "darwin"
 start <- params$start
 duration <- format(today() - start, format = "%d")
 
+repos <- jsonlite::stream_in(url("https://epiverse-trace.r-universe.dev/stats/descriptions"), verbose = FALSE) %>%
+  dplyr::pull(RemoteUrl) %>%
+  stringr::str_remove("^https://github.com/")
+
 repo_infos <-
-  params$repos %>%
+  repos %>%
   strsplit("/") %>%
   map_dfr(function(orgrepo) {
     tibble(org = orgrepo[[1]], repo = orgrepo[[2]])
