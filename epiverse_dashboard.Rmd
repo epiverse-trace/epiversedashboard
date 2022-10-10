@@ -3,7 +3,6 @@ output:
   flexdashboard::flex_dashboard:
     orientation: rows
     vertical_layout: fill
-    theme: paper
     source_code: "https://github.com/epiverse-trace/epiversedashboard"
 params:
   title:
@@ -21,6 +20,15 @@ params:
 title: "`r params$title`"	
 ---
 
+<style>
+.navbar-inverse {
+  background-color: #071e2d;
+}
+.navbar-inverse .navbar-nav > .active > a {
+  background-color: #071e2d;
+}
+</style>
+
 ```{r setup, include = FALSE}
 library(flexdashboard)
 library(gh)
@@ -37,10 +45,6 @@ library(tidyr)
 library(sparkline)
 library(ggplot2)
 on_macos <- function() tolower(Sys.info()[["sysname"]]) == "darwin"
-gh_colors <- list(
-  green = "#2cbe4e",
-  red = "#CB2434",
-  purple = "#6f42c1")
 start <- params$start
 duration <- format(today() - start, format = "%d")
 
@@ -139,43 +143,43 @@ issue_open <- sum(repo_summary$open_issues)
 
 ### Pull requests opened
 ```{r}
-valueBox(pr_opened_sum, icon = "fa-exclamation-circle", color = "#cfe2f3")
+valueBox(pr_opened_sum, icon = "fa-exclamation-circle", color = "#aec800")
 ```
 
 ### Pull requests merged / closed
 ```{r}
-valueBox(pr_closed_sum, icon = "ion-merge", color = "#ead1e8")
+valueBox(pr_closed_sum, icon = "ion-merge", color = "#106ba0")
 ```
 
 ### Pull requests `r duration` change
 ```{r}
-valueBox(pr_change, icon = "fa-exclamation-circle", color = if (pr_change <= 0) "#D1E2CC" else "danger")
+valueBox(pr_change, icon = if (issue_change <= 0) "fa-arrow-down" else "fa-arrow-up", color = if (pr_change <= 0) "#ebe6e0" else "#f04a4c")
 ```
 
 ### Remaining pull requests
 ```{r}
-valueBox(pr_open, icon = "fa-clipboard-list", color = "#DDD")
+valueBox(pr_open, icon = "fa-clipboard-list", color = "#888")
 ```
 
 ### Issues opened
 ```{r}
-valueBox(issue_opened_sum, icon = "fa-exclamation-circle", color = "#cfe2f3")
+valueBox(issue_opened_sum, icon = "fa-exclamation-circle", color = "#aec800")
 ```
 
 ### Issues closed
 ```{r}
-valueBox(issue_closed_sum, icon = "fa-times-circle", color = "#ead1e8")
+valueBox(issue_closed_sum, icon = "fa-times-circle",, color = "#106ba0")
 ```
 
 
 ### Issues `r duration` change
 ```{r}
-valueBox(issue_change, icon = if (issue_change <= 0) "fa-arrow-down" else "fa-arrow-up", color = if (issue_change <= 0) "#D1E2CC" else "danger")
+valueBox(issue_change, icon = if (issue_change <= 0) "fa-arrow-down" else "fa-arrow-up", color = if (pr_change <= 0) "#ebe6e0" else "#f04a4c")
 ```
 
 ### Remaining issues
 ```{r}
-valueBox(issue_open, icon = "fa-clipboard-list", color = "#DDD")
+valueBox(issue_open, icon = "fa-clipboard-list", color = "#888")
 ```
 
 
@@ -223,11 +227,14 @@ daily %>%
   labs(
     title = "Daily changes in issues and PRs",
     x = NULL,
-    y = NULL
+    y = NULL,
+    fill = ""
   ) + 
   scale_y_continuous(breaks = scales::breaks_width(20), expand = c(0, 5)) +
-  scale_fill_brewer(palette = "Set1", guide = NULL) + 
-  scale_x_date(date_breaks = "1 week", date_labels = "%b %d", date_minor_breaks = "1 day")
+  scale_fill_manual(values = c("#10BED2", "#F04A4C")) + 
+  scale_x_date(date_breaks = "1 week", date_labels = "%b %d", date_minor_breaks = "1 day") +
+  theme_minimal() + 
+  theme(legend.position = "bottom")
 ```
 
 > `r start` - `r now()`
